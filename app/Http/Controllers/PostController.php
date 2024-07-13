@@ -113,13 +113,30 @@ class PostController extends Controller
          // authenticated user
         Gate::authorize('modify',$post);
                 // validation
-        $fields = $request->validate([
+        $request->validate([
             'title' => ['required', 'max:255'],
             'body' => ['required'],
+            'image' => ['nullable','file','max:1000','mimes:jpg,png,webp']
 
         ]);
+            
+        // check if the image is exist
+        $path = $post->image ?? null;
+        if($request->hasFile('image')){
+            if($post->image){
+                storage::disk('public')->delete($post->image);
+            }
+            $path = Storage::disk('public')->put('post_images', $request->image);
+        }
+
         // create post
-        $post->update($fields);
+        $post->update(
+            [
+                'title' => $request->title,
+                'body' => $request->body,
+                'image' => $path
+            ]
+        );
 
         // redirect 
        return redirect()->route('dashboard')->with('success', 'Your post was updated');
@@ -135,6 +152,11 @@ class PostController extends Controller
     {
         // authenticated user
         Gate::authorize('modify',$post);
+
+        // delete post image if exist
+        if($post->image){
+            storage::disk('public')->delete($post->image);
+        }
          // delete the post
            $post->delete();
          // rediret 
