@@ -9,6 +9,7 @@ use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 
 class PostController extends Controller 
 {
@@ -47,13 +48,27 @@ class PostController extends Controller
     public function store(Request $request)
     {     
         // validation
-        $fields = $request->validate([
+        $request->validate([
             'title' => ['required', 'max:255'],
             'body' => ['required'],
+            'image' => ['nullable','file','max:1000','mimes:jpg,png,webp']
 
         ]);
+
+        // store image if exist
+        $path = null;
+        if($request->hasFile('image')){
+            $path = Storage::disk('public')->put('post_images', $request->image);
+
+        }
+       
+
         // create post
-       Auth::user()->posts()->create($fields);
+       Auth::user()->posts()->create([
+        'title' => $request->title,
+        'body' => $request->body,
+        'image' => $path
+       ]);
 
         // redirect 
        return back()->with('success', 'Your post was created');

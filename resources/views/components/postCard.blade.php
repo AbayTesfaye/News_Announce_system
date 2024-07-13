@@ -1,6 +1,14 @@
 @props(['post','full'=>false])
 
 <div class="card bg-white shadow-md rounded-lg p-6 mb-6">
+   {{-- cover photo --}}
+   <div class="mb-4">
+     @if ($post->image)
+      <img src="{{ asset('storage/'. $post->image )}}" alt="Post Image" class="w-full h-80 object-cover object-center rounded-md">
+     @else
+      <img src="{{ asset('storage/post_images/default.png')}}" alt="Default Image" class="w-full h-48 object-cover object-center rounded-md">
+     @endif
+   </div>
   {{-- title --}}
   <h2 class="text-2xl font-semibold mb-2">{{ $post->title }}</h2>
 
@@ -10,8 +18,7 @@
       <a href="{{ route('user.posts',$post->user)}}" class="text-blue-500 font-medium">{{ $post->user->username}}</a>
   </div>
   {{-- body --}}
-
-   @if ($full)
+  @if ($full)
       <div class="text-sm text-gray-800">
         <span>{{ $post->body }}</span>
       </div>
@@ -26,5 +33,4 @@
    <div class="flex items-center justify-end gap-4 mt-6">
       {{ $slot }}
    </div>
-
 </div>
